@@ -2,7 +2,7 @@
 
 # gute_saetze.py
 
-# Version 3.0.0
+# Version 3.1.0
 
 # Eingabe: Eine vrt-Datei, mit POS-Tags (UPenn Tagset) in der zweiten Spalte
 #          Die VRT-Datei muss Satzauszeichnung durch <s>-Tags haben
@@ -17,18 +17,13 @@ import os
 import langid
 import argparse
 
-usage = "Usage: gute_saetze.py [--lang=langid] infile outfile [--log=logfile]\n"
-
 ap = argparse.ArgumentParser()
 ap.add_argument("--lang", dest="lang", default="en")
+ap.add_argument("--poscol", dest="pos_column", type=int, default=1)
 ap.add_argument("infile")
 ap.add_argument("outfile")
 ap.add_argument("--log", dest="log", default="gute_saetze.log")
 options = ap.parse_args()
-
-if len(sys.argv) < 3:
-  print (usage)
-  exit()
 
 infile = open(options.infile, "r")
 outfile = open(options.outfile, "w")
@@ -38,7 +33,6 @@ logfile = open(options.log, "w")
 # Parameter
 
 min_token_count = 8 # Minimale Tokenzahl in einem guten Satz
-pos_column = 1 # Spalte der POS Annotation, ab 0 gezaehlt
 
 # Intialisierungen
 
@@ -140,7 +134,7 @@ for zeile in infile:
           sentences_accepted += 1
           tokens_accepted += buffered_tokens
           buffered = 0
-    pos = zeile.strip().split("\t")[pos_column]
+    pos = zeile.strip().split("\t")[options.pos_column]
     if pos[0] == "V":
       has_verb = 1
   else: # This should not happen
@@ -155,7 +149,7 @@ outfile.close()
 
 # Schreibe Logdatei
 
-logfile.write("Output from gute_saetze.py "+sys.argv[1]+" "+sys.argv[2]+"\n\n")
+logfile.write("Output from "+" ".join(sys.argv)+"\n\n")
 logfile.write("Tokens processed:\t"+str(tokens_processed)+"\n")
 percentage = tokens_accepted *100.0/tokens_processed
 logfile.write("Tokens accepted:\t"+str(tokens_accepted)+"\t"+str(percentage)+"%\n")
